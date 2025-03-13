@@ -1,4 +1,5 @@
-# Copyright 2024-2025, shadow3aaa
+#!/system/bin/sh
+# Copyright 2023-2025, dependabot[bot], shadow3, shadow3aaa
 #
 # This file is part of fas-rs.
 #
@@ -15,22 +16,24 @@
 # You should have received a copy of the GNU General Public License along
 # with fas-rs. If not, see <https://www.gnu.org/licenses/>.
 
-headerPath = "LICENSE_HEADER"
-includes = [
-    "licenserc.toml",
-    "src/**",
-    "Cargo.toml",
-    "build.rs",
-    "make.py",
-    "maketools/**",
-    "module/**",
-    ".github/**",
-    ".cargo/**",
-    "xtask/src/**",
-    "xtask/Cargo.toml",
-]
-excludes = ["module/games.toml", "module/META-INF/**", "module/*.prop"]
+MODDIR=${0%/*}
+DIR=/sdcard/Android/fas-rs
+MERGE_FLAG=$DIR/.need_merge
+LOG=$DIR/fas_log.txt
 
-[git]
-attrs = 'auto'
-ignore = 'auto'
+sh $MODDIR/vtools/init_vtools.sh $(realpath $MODDIR/module.prop)
+
+resetprop fas-rs-installed true
+
+until [ -d $DIR ]; do
+	sleep 1
+done
+
+if [ -f $MERGE_FLAG ]; then
+	$MODDIR/fas-rs merge $MODDIR/games.toml >$DIR/.update_games.toml
+	rm $MERGE_FLAG
+	mv $DIR/.update_games.toml $DIR/games.toml
+fi
+
+killall fas-rs
+RUST_BACKTRACE=1 nohup $MODDIR/fas-rs run $MODDIR/games.toml >$LOG 2>&1 &
