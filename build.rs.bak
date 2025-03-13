@@ -114,7 +114,4 @@ fn update_json(data: &CargoConfig) -> Result<()> {
     fs::write("update/update_en.json", en)?;
 
     Ok(())
-    if()
 }
-
-
